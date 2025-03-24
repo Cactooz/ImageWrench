@@ -1,0 +1,10 @@
+*.o
+*.obj
+*.lib
+*.exe
+*.out
+*.tmp
+*.temp
+
+.DS_Store
+__MACOSX
