@@ -6,5 +6,7 @@
 *.tmp
 *.temp
 
+build/
+
 .DS_Store
 __MACOSX
