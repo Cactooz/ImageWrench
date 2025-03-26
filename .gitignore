@@ -7,6 +7,10 @@
 *.temp
 
 build/
+.vscode/
 
 .DS_Store
 __MACOSX
+
+*.plist
+*.out.yml
