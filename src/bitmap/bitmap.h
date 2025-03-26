@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#ifndef BITMAP_H
+#define BITMAP_H
+
 typedef struct {
 	uint16_t type;
 	uint32_t size;
@@ -47,3 +50,12 @@ typedef struct {
 	uint32_t profile_size;
 	uint32_t reserved;
 } BMv5Header;
+
+typedef struct {
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	uint8_t reserved;
+} RGBQuad;
+
+#endif
