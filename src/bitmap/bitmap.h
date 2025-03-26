@@ -8,7 +8,7 @@ typedef struct {
 	uint32_t size;
 	uint32_t reserved;
 	uint32_t offset;
-} BMPHeader;
+} __attribute__((packed)) BMPHeader;
 
 typedef struct {
 	uint32_t type;
