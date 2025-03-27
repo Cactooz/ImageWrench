@@ -9,21 +9,18 @@
 	#include <unistd.h>
 #endif
 
-const MenuOption main_menu_options[] = {
-	{"Blur", BLUR, 0},
-	{"Sharpen", SHARPEN, 0},
-	{"Exit", EXIT, 0}
+MenuOption main_menu_options[] = {
+	{"Blur", BLUR, -1, -1, -1, -1},
+	{"Sharpen", SHARPEN, -1, -1, -1, -1},
+	{"Exit", EXIT, -1, -1, -1, -1}
 };
 const short main_menu_options_count = 3;
 
-const MenuOption kernel_menu_options[] = {
-	{"Kernel Size: 3", OPTION, 3},
-	{"Kernel Size: 5", OPTION, 5},
-	{"Kernel Size: 7", OPTION, 7},
-	{"Kernel Size: 9", OPTION, 9},
-	{"Back", MAIN, 0}
+MenuOption kernel_menu_options[] = {
+	{"Kernel Size", OPTION, 7, 3, 49, 2},
+	{"Back", MAIN, -1, -1, -1, -1}
 };
-const short kernel_menu_options_count = 5;
+const short kernel_menu_options_count = 2;
 
 void menu(void) {
 	int running = 1;
@@ -111,19 +108,27 @@ int get_key(void) {
 	#endif
 }
 
-MenuOption display_menu(const char* title, const MenuOption* options, int option_count) {
-	int key, i;
-	int selected = 0;
+MenuOption display_menu(const char* title, MenuOption* options, short option_count) {
+	short key, i;
+	short selected = 0;
 
 	while(1) {
 		clear_screen();
 		printf("%s\n\n", title);
 		for(i = 0; i < option_count; i++) {
 			if(i == selected) {
-				printf("> %s\n", options[i].title);
+				printf("> ");
 			} else {
-				printf("  %s\n", options[i].title);
+				printf("  ");
 			}
+
+			printf("%s ", options[i].title);
+
+			if(options[i].option > 0) {
+				/* printf(": %d ", options[i].option); */
+				print_variable_menu(options[i].min, options[i].max, ((options[i].max - options[i].min) / options[i].step_size) + 1, options[i].option);
+			}
+			printf("\n");
 		}
 		fflush(stdout);
 
@@ -142,10 +147,61 @@ MenuOption display_menu(const char* title, const MenuOption* options, int option
 			case 's':
 				selected = (selected < option_count - 1) ? selected + 1 : 0;
 				break;
+			/* Left arrow or a to decrese option */
+			case 67:
+			case 75:
+			case 'a':
+				if(options->option > options->min) {
+					options->option -= options->step_size;
+				}
+				break;
+			/* Right arrow or d to increase option */
+			case 68:
+			case 77:
+			case 'd':
+				if(options->option < options->max) {
+					options->option += options->step_size;
+				}
+				break;
 			/* LF and CR to exit/enter menu */
 			case 10:
 			case 13:
 				return options[selected];
 		}
+	}
+}
+
+void print_variable_menu(short min, short max, short steps, short current) {
+	short i;
+	short step_size = ((max - min) / steps) + 1;
+
+	if(current != min) {
+		printf("< ");
+	} else {
+		printf("  ");
+	}
+
+	/* Print start of menu leading up to current value */
+	printf("[");
+	for(i = min; i < current; i += step_size) {
+		printf("-");
+	}
+
+	/* Print the current value */
+	if(current < 10) {
+		printf(" 0");
+	} else {
+		printf(" ");
+	}
+	printf("%d ", current);
+
+	/* Print the remaining part of the menu */
+	for(i = current + 1; i < max; i += step_size) {
+		printf("-");
+	}
+	printf("]");
+
+	if(current != max) {
+		printf(" >");
 	}
 }
