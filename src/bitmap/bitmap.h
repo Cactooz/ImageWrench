@@ -20,7 +20,7 @@ typedef struct {
 	uint16_t color_planes;
 	uint16_t bits_per_pixel;
 	uint32_t compression;
-	uint32_t size_image;
+	uint32_t image_size;
 	uint32_t horizontal_resolution;
 	uint32_t vertical_resolution;
 	uint32_t color_count;
@@ -52,9 +52,9 @@ typedef struct {
 } BMv5Header;
 
 typedef struct {
-	uint8_t red;
-	uint8_t green;
 	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
 	uint8_t reserved;
 } RGBQuad;
 
