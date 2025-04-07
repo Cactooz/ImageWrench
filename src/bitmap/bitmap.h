@@ -15,6 +15,13 @@ typedef struct {
 } DIBHeaderSize;
 
 typedef struct {
+	uint16_t width;
+	uint16_t height;
+	uint16_t color_planes;
+	uint16_t bits_per_pixel;
+} BMCoreHeader;
+
+typedef struct {
 	uint32_t width;
 	uint32_t height;
 	uint16_t color_planes;
@@ -57,5 +64,11 @@ typedef struct {
 	uint8_t red;
 	uint8_t reserved;
 } RGBQuad;
+
+typedef struct {
+	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
+} __attribute__((packed)) RGBTriple;
 
 #endif
