@@ -97,7 +97,7 @@ Image* read_image(char name[]) {
     if(bits_per_pixel != 1 &&
         bits_per_pixel != 4 &&
         bits_per_pixel != 8 &&
-        /*bits_per_pixel != 16 && TODO: Fix 16 bpp support*/
+        bits_per_pixel != 16 &&
         bits_per_pixel != 24 && 
         bits_per_pixel != 32) {
         fprintf(stderr, "Error: Unsupported bitmap type bits per pixel: %d\n", bits_per_pixel);
@@ -275,7 +275,6 @@ uint32_t** pixel_data_to_array(Image* image) {
                 }
                 pos = y * row_size + x * 2;
                 pixel = image->pixel_data[pos + 1] << 8 | image->pixel_data[pos];
-                /* TODO: Remember when going back to pixel_data to use masks */
                 red = (pixel & image->red_mask) >> trailing_zeros_count(image->red_mask);
                 green = (pixel & image->green_mask) >> trailing_zeros_count(image->green_mask);
                 blue = (pixel & image->blue_mask) >> trailing_zeros_count(image->blue_mask);
@@ -339,6 +338,10 @@ uint8_t* array_to_pixel_data(Image* image, uint32_t** array) {
     uint8_t green;
     uint8_t blue;
     uint8_t alpha;
+    uint8_t red_cap;
+    uint8_t green_cap;
+    uint8_t blue_cap;
+    uint16_t pixel;
 
     if(image->flags[INFO_HEADER]) {
         height = image->bm_info_header.height;
@@ -383,9 +386,37 @@ uint8_t* array_to_pixel_data(Image* image, uint32_t** array) {
                     /* Color index is entire byte, simply set it */
                     pixel_data[y * row_size + x] = index;
                 }
-            } else if(bits_per_pixel == 16) {
-                /* TOOD: Use correct masks to set it properly */
+            } else if(bits_per_pixel == 16) {                
+                if(!image->flags[BITFIELDS]) {
+                    /*If no bitfields compression, use regular 5-5-5 RGB*/
+                    image->red_mask = 0x7C00;
+                    image->green_mask = 0x03E0;
+                    image->blue_mask = 0x001F;
+                }
 
+                /* Get RGB values from ARGB array */
+                red = (array[y][x] & 0x00FF0000) >> 16;
+                green = (array[y][x] & 0x0000FF00) >> 8;
+                blue = (array[y][x] & 0x000000FF);
+                
+                /* Cap values */
+                /*TODO: Optimize use of trailing_zeros_count*/
+                red_cap = image->red_mask >> trailing_zeros_count(image->red_mask);
+                green_cap = image->green_mask >> trailing_zeros_count(image->green_mask);
+                blue_cap = image->blue_mask >> trailing_zeros_count(image->blue_mask);
+
+                if(red > red_cap)
+                    red = red_cap;
+                if(green > green_cap)
+                    green = green_cap;
+                if(blue > blue_cap)
+                    blue = blue_cap;
+
+                pos = y * row_size + x * 2;
+                pixel = (red << trailing_zeros_count(image->red_mask) | green << trailing_zeros_count(image->green_mask) | blue << trailing_zeros_count(image->blue_mask));
+
+                pixel_data[pos] = (uint8_t)(pixel & 0xFF);
+                pixel_data[pos + 1] = (uint8_t)(pixel >> 8);
             } else if(bits_per_pixel == 24) {
                 /* Extract 3 bytes as BGR */
                 pos = y * row_size + x * 3;
