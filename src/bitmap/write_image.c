@@ -68,6 +68,9 @@ void array_to_pixel_data(Image* image, uint32_t** array) {
     int byte;
     int offset;
     int pos;
+    int red_mask_zeros;
+    int green_mask_zeros;
+    int blue_mask_zeros;
     uint8_t red;
     uint8_t green;
     uint8_t blue;
@@ -133,10 +136,14 @@ void array_to_pixel_data(Image* image, uint32_t** array) {
                 green = (array[y][x] & 0x0000FF00) >> 8;
                 blue = (array[y][x] & 0x000000FF);
                 
+                red_mask_zeros = trailing_zeros_count(image->red_mask);
+                green_mask_zeros = trailing_zeros_count(image->green_mask);
+                blue_mask_zeros = trailing_zeros_count(image->blue_mask);
+
                 /* Cap values */
-                red_cap = image->red_mask >> trailing_zeros_count(image->red_mask);
-                green_cap = image->green_mask >> trailing_zeros_count(image->green_mask);
-                blue_cap = image->blue_mask >> trailing_zeros_count(image->blue_mask);
+                red_cap = image->red_mask >> red_mask_zeros;
+                green_cap = image->green_mask >> green_mask_zeros;
+                blue_cap = image->blue_mask >> blue_mask_zeros;
 
                 if(red > red_cap)
                     red = red_cap;
@@ -146,7 +153,7 @@ void array_to_pixel_data(Image* image, uint32_t** array) {
                     blue = blue_cap;
 
                 pos = y * row_size + x * 2;
-                pixel = (red << trailing_zeros_count(image->red_mask) | green << trailing_zeros_count(image->green_mask) | blue << trailing_zeros_count(image->blue_mask));
+                pixel = (red << red_mask_zeros | green << green_mask_zeros | blue << blue_mask_zeros);
 
                 pixel_data[pos] = (uint8_t)(pixel & 0xFF);
                 pixel_data[pos + 1] = (uint8_t)(pixel >> 8);
