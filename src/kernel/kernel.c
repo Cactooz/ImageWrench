@@ -3,7 +3,7 @@
 #include <math.h>
 #include "kernel.h"
 
-float** createKernel(int size) {
+float** create_kernel(int size) {
 	float** kernel = malloc(sizeof(float*) * size);
 	int i;
 	for(i = 0; i < size; i++) {
@@ -12,7 +12,15 @@ float** createKernel(int size) {
 	return kernel;
 }
 
-void invertKernel(float** kernel, int size) {
+void free_kernel(float** kernel, int size) {
+	int i;
+	for(i = 0; i < size; i++) {
+		free(kernel[i]);
+	}
+	free(kernel);
+}
+
+void invert_kernel(float** kernel, int size) {
 	int i, j;
 	for(i = 0; i < size; i++) {
 		for(j = 0; j < size; j++) {
@@ -21,8 +29,8 @@ void invertKernel(float** kernel, int size) {
 	}
 }
 
-float** createBoxBlurKernel(int size) {
-	float** kernel = createKernel(size);
+float** create_box_blur_kernel(int size) {
+	float** kernel = create_kernel(size);
 	float value = 1.0f / (size * size);
 	int i, j;
 	for(i = 0; i < size; i++) {
@@ -33,8 +41,8 @@ float** createBoxBlurKernel(int size) {
 	return kernel;
 }
 
-float** createGaussianBlurKernel(int size) {
-	float** kernel = createKernel(size);
+float** create_guassian_blur_kernel(int size) {
+	float** kernel = create_kernel(size);
 	float sum = 0.0f;
 	int center = size / 2;
 	int i, j, di, dj;
@@ -59,10 +67,10 @@ float** createGaussianBlurKernel(int size) {
 	return kernel;
 }
 
-float** createSharpenKernel(int size) {
+float** create_sharpen_kernel(int size) {
 	int i, j;
 	int center = size / 2;
-	float** kernel = createKernel(size);
+	float** kernel = create_kernel(size);
 	for(i = 0; i < size; i++) {
 		for(j = 0; j < size; j++) {
 			kernel[i][j] = -1;
@@ -73,15 +81,15 @@ float** createSharpenKernel(int size) {
 }
 
 float** createGaussianSharpenKernel(int size) {
-	float** kernel = createGaussianBlurKernel(size);
+	float** kernel = create_guassian_blur_kernel(size);
 	int center = size / 2;
-	invertKernel(kernel, size);
+	invert_kernel(kernel, size);
 	kernel[center][center] = 2;
 	return kernel;
 }
 
-float** createOutlineKernel(int size) {
-	float** kernel = createSharpenKernel(size);
+float** create_outline_kernel(int size) {
+	float** kernel = create_sharpen_kernel(size);
 	int center = size / 2;
 	kernel[center][center] -= 1;
 	return kernel;

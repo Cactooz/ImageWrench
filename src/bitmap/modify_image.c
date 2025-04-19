@@ -17,10 +17,10 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 
 	switch(kernel_type) {
 		case BLUR:
-			kernel = createBoxBlurKernel(kernel_size);
+			kernel = create_box_blur_kernel(kernel_size);
 			break;
 		case SHARPEN:
-			kernel = createSharpenKernel(kernel_size);
+			kernel = create_sharpen_kernel(kernel_size);
 			break;
 		default:
 			fprintf(stderr, "Error: Invalid kernel.");
@@ -47,7 +47,7 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 			r_sum = 0.0f;
 			g_sum = 0.0f;
 			b_sum = 0.0f;
-			a = 0xFF;
+			a_sum = 0.0f;
 
 			for (ki = 0; ki < kernel_size; ki++) {
 				for (kj = 0; kj < kernel_size; kj++) {
@@ -77,4 +77,10 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 	}
 
 	array_to_pixel_data(image, result);
+
+	for (i = 0; i < height; i++) {
+		free(result[i]);
+	}
+	free(result);
+	free_kernel(kernel, kernel_size);
 }
