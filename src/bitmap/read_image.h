@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "bitmap.h"
 
 #ifndef READ_IMAGE_H
@@ -44,11 +45,5 @@ Image* read_image(char name[]);
 int trailing_zeros_count(uint32_t number);
 
 uint32_t** pixel_data_to_array(Image* image);
-
-uint8_t* array_to_pixel_data(Image* image, uint32_t** array);
-
-int find_closest_color(uint32_t color, RGBQuad* color_table, uint32_t color_table_length);
-
-int color_distance(uint8_t red1, uint8_t red2, uint8_t green1, uint8_t green2, uint8_t blue1, uint8_t blue2);
 
 #endif
