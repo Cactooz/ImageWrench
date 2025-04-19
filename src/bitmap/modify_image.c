@@ -36,10 +36,10 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 	}
 
 	pixels = pixel_data_to_array(image);
-	result = malloc(height * sizeof(uint32_t*));
 
+	result = malloc(height* sizeof(uint32_t*));
 	for (i = 0; i < height; i++) {
-		result[i] = malloc(width * sizeof(uint32_t));
+		result[i] = malloc(width* sizeof(uint32_t));
 	}
 
 	for(i = 0; i < height; i++) {
@@ -78,9 +78,10 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 
 	array_to_pixel_data(image, result);
 
-	for (i = 0; i < height; i++) {
-		free(result[i]);
+	/* Free pixels as they have been replaced by result */
+	for(i = 0; i < height; i++) {
+		free(pixels[i]);
 	}
-	free(result);
+	free(pixels);
 	free_kernel(kernel, kernel_size);
 }
