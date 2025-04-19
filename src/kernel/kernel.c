@@ -1,8 +1,10 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include "kernel.h"
 
 float** createKernel(int size) {
-	float** kernel = malloc(sizeof(float) * size);
+	float** kernel = malloc(sizeof(float*) * size);
 	int i;
 	for(i = 0; i < size; i++) {
 		kernel[i] = malloc(sizeof(float) * size);

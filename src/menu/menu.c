@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "menu.h"
+#include "../bitmap/read_image.h"
+#include "../bitmap/modify_image.h"
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -12,17 +15,18 @@
 MenuOption main_menu_options[] = {
 	{"Blur", BLUR, -1, -1, -1, -1},
 	{"Sharpen", SHARPEN, -1, -1, -1, -1},
-	{"Exit", EXIT, -1, -1, -1, -1}
+	{"Save & Exit", EXIT, -1, -1, -1, -1}
 };
-const short main_menu_options_count = 3;
+const int main_menu_options_count = 3;
 
 MenuOption kernel_menu_options[] = {
-	{"Kernel Size", OPTION, 7, 3, 49, 2},
+	{"Kernel Size", OPTION, 7, 3, 11, 2},
+	{"Apply Filter", APPLY, -1, -1, -1, -1},
 	{"Back", MAIN, -1, -1, -1, -1}
 };
-const short kernel_menu_options_count = 2;
+const int kernel_menu_options_count = 3;
 
-void menu(void) {
+void menu(Image* image) {
 	int running = 1;
 	Menu current_menu = MAIN;
 	MenuOption choice;
@@ -30,22 +34,22 @@ void menu(void) {
 	while(running) {
 		switch(current_menu) {
 			case MAIN:
-				choice = display_menu("ImageWrench", main_menu_options, main_menu_options_count);
+				choice = display_menu(MAIN, "ImageWrench", main_menu_options, main_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case BLUR:
-				choice = display_menu("Blur Image", kernel_menu_options, kernel_menu_options_count);
+				choice = display_menu(BLUR, "Blur Image", kernel_menu_options, kernel_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case SHARPEN:
-				choice = display_menu("Sharpen Image", kernel_menu_options, kernel_menu_options_count);
+				choice = display_menu(SHARPEN, "Sharpen Image", kernel_menu_options, kernel_menu_options_count, image);
 				current_menu = choice.menu;
-				break;
-			case OPTION:
-				current_menu = MAIN;
 				break;
 			case EXIT:
 				running = 0;
+				break;
+			default:
+				current_menu = MAIN;
 				break;
 		}
 	}
@@ -83,7 +87,7 @@ int get_key(void) {
 		return _getch();
 	#else
 		struct termios old_terminal_interface, new_terminal_interface;
-		short c = 0;
+		int c = 0;
 
 		/* Save current terminal settings */
 		tcgetattr(STDIN_FILENO, &old_terminal_interface);
@@ -108,9 +112,9 @@ int get_key(void) {
 	#endif
 }
 
-MenuOption display_menu(const char* title, MenuOption* options, short option_count) {
-	short key, i;
-	short selected = 0;
+MenuOption display_menu(Menu current_menu, const char* title, MenuOption* options, int option_count, Image* image) {
+	int key, i, kernel_size;
+	int selected = 0;
 
 	while(1) {
 		clear_screen();
@@ -125,10 +129,13 @@ MenuOption display_menu(const char* title, MenuOption* options, short option_cou
 			printf("%s ", options[i].title);
 
 			if(options[i].option > 0) {
-				/* printf(": %d ", options[i].option); */
 				print_variable_menu(options[i].min, options[i].max, ((options[i].max - options[i].min) / options[i].step_size) + 1, options[i].option);
 			}
 			printf("\n");
+
+			if(options[i].menu == OPTION) {
+				kernel_size = options[i].option;
+			}
 		}
 		fflush(stdout);
 
@@ -148,7 +155,7 @@ MenuOption display_menu(const char* title, MenuOption* options, short option_cou
 				selected = (selected < option_count - 1) ? selected + 1 : 0;
 				break;
 			/* Left arrow or a to decrese option */
-			case 67:
+			case 68:
 			case 75:
 			case 'a':
 				if(options->option > options->min) {
@@ -156,7 +163,7 @@ MenuOption display_menu(const char* title, MenuOption* options, short option_cou
 				}
 				break;
 			/* Right arrow or d to increase option */
-			case 68:
+			case 67:
 			case 77:
 			case 'd':
 				if(options->option < options->max) {
@@ -166,14 +173,22 @@ MenuOption display_menu(const char* title, MenuOption* options, short option_cou
 			/* LF and CR to exit/enter menu */
 			case 10:
 			case 13:
+				if(options[selected].menu == APPLY) {
+					printf(" ================================\n");
+					printf(" | Applying kernel, please wait |\n");
+					printf(" ================================\n");
+					apply_kernel(image, current_menu, kernel_size);
+				} else if(options[selected].menu == OPTION) {
+					break;
+				}
 				return options[selected];
 		}
 	}
 }
 
-void print_variable_menu(short min, short max, short steps, short current) {
-	short i;
-	short step_size = ((max - min) / steps) + 1;
+void print_variable_menu(int min, int max, int steps, int current) {
+	int i;
+	int step_size = ((max - min) / steps) + 1;
 
 	if(current != min) {
 		printf("< ");
