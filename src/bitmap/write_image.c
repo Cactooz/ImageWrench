@@ -183,6 +183,9 @@ void array_to_pixel_data(Image* image, uint32_t** array) {
             } 
         }
     }
+    /*Free original pixel data*/
+    free(image->pixel_data);
+    image->pixel_data = NULL;
     image->pixel_data = pixel_data;
     free_array(image, array);
 }
@@ -212,12 +215,16 @@ int color_distance(uint8_t red1, uint8_t red2, uint8_t green1, uint8_t green2, u
 }
 
 void free_image(Image* image) {
-    free(image->color_table);
-    free(image->color_table_triple);
-    free(image->gap_to_pixel);
+    if(image->flags[COLOR_TABLE])
+        free(image->color_table);
+    if(image->flags[RGB_TRIPLE])
+        free(image->color_table_triple);
+    if(image->flags[GAP_TO_PIXEL])
+        free(image->gap_to_pixel);
     free(image->pixel_data);
     free(image->rest_of_img);
     free(image);
+    image = NULL;
 }
 
 void free_array(Image* image, uint32_t** array) {
@@ -230,4 +237,5 @@ void free_array(Image* image, uint32_t** array) {
     for(y = 0; y < height; y++)
         free(array[y]);
     free(array);
+    array = NULL;
 }

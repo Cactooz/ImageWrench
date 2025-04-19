@@ -38,6 +38,7 @@ Image* read_image(char name[]) {
     file_pointer = fopen(name, "rb");
     if (file_pointer == NULL) {
         fprintf(stderr, "Error: Unable to open file %s\n", name);
+        free(image);
         exit(2);
     }
     image->file = file_pointer;
@@ -46,6 +47,8 @@ Image* read_image(char name[]) {
     items_read = fread(&bmp_header, sizeof(bmp_header), 1, file_pointer);
     if(items_read != 1) {
         fprintf(stderr, "Error: Unable to read BMP header from file %s\n", name);
+        fclose(file_pointer);
+        free(image);
         exit(3);
     }
     bytes_read += sizeof(bmp_header);
@@ -55,6 +58,8 @@ Image* read_image(char name[]) {
     items_read = fread(&dib_header_size, sizeof(dib_header_size), 1, file_pointer);
     if(items_read != 1) {
         fprintf(stderr, "Error: Unable to read DIB header size from file %s\n", name);
+        fclose(file_pointer);
+        free(image);
         exit(3);
     }
     bytes_read += sizeof(dib_header_size);
@@ -63,6 +68,8 @@ Image* read_image(char name[]) {
     /*Check for unsupported bitmaps*/
     if(dib_header_size.type != 12 && dib_header_size.type != 40 && dib_header_size.type != 124) {
         fprintf(stderr, "Error: Unsupported bitmap header\n");
+        fclose(file_pointer);
+        free(image);
         exit(4);
     }
 
@@ -71,6 +78,8 @@ Image* read_image(char name[]) {
         items_read = fread(&bm_core_header, sizeof(bm_core_header), 1, file_pointer);
         if(items_read != 1) {
             fprintf(stderr, "Error: Unable to read BM Core Header from file %s\n", name);
+            fclose(file_pointer);
+            free(image);
             exit(3);
         }
         image->bm_core_header = bm_core_header;
@@ -85,6 +94,8 @@ Image* read_image(char name[]) {
         items_read = fread(&bm_info_header, sizeof(bm_info_header), 1, file_pointer);
         if(items_read != 1) {
             fprintf(stderr, "Error: Unable to read DIB header from file %s\n", name);
+            fclose(file_pointer);
+            free(image);
             exit(3);
         }
         bytes_read += sizeof(bm_info_header);
@@ -101,6 +112,8 @@ Image* read_image(char name[]) {
         bits_per_pixel != 24 && 
         bits_per_pixel != 32) {
         fprintf(stderr, "Error: Unsupported bitmap type bits per pixel: %d\n", bits_per_pixel);
+        fclose(file_pointer);
+        free(image);
         exit(4);
     }
 
@@ -110,6 +123,8 @@ Image* read_image(char name[]) {
         items_read = fread(&bm_v5_header, sizeof(bm_v5_header), 1, file_pointer);
         if(items_read != 1) {
             fprintf(stderr, "Error: Unable to read DIB header from file %s\n", name);
+            fclose(file_pointer);
+            free(image);
             exit(3);
         }
         bytes_read += sizeof(bm_v5_header);
@@ -151,6 +166,10 @@ Image* read_image(char name[]) {
         }
         if(items_read != nr_of_colors) {
             fprintf(stderr, "Error: Unable to read color table from file %s\n", name);
+            free(image);
+            free(color_table);
+            if(image->flags[RGB_TRIPLE])
+                free(color_table_temp);
             exit(3);
         }
         image->color_table = color_table;
@@ -163,6 +182,10 @@ Image* read_image(char name[]) {
         items_read = fread(masks, sizeof(uint32_t), 3, file_pointer);
         if(items_read != 3) {
             fprintf(stderr, "Error: Unable to read color masks from file %s\n", name);
+            free(image);
+            free(color_table);
+            if(image->flags[RGB_TRIPLE])
+                free(color_table_temp);
             exit(3);
         }
         bytes_read += sizeof(uint32_t) * 3;
@@ -174,6 +197,10 @@ Image* read_image(char name[]) {
     /*Check for unsupported bitmaps*/
     if(image->flags[INFO_HEADER] && bm_info_header.compression != 0 && bm_info_header.compression != 1 && bm_info_header.compression != 2 && bm_info_header.compression != 3) {
         fprintf(stderr, "Error: Unsupported bitmap compression in file %s\n", name);
+        free(image);
+        free(color_table);
+        if(image->flags[RGB_TRIPLE])
+            free(color_table_temp);
         exit(4);
     }
 
@@ -186,6 +213,11 @@ Image* read_image(char name[]) {
         items_read = fread(gap_to_pixel, sizeof(uint8_t), image->gap_to_pixel_len, file_pointer);
         if(items_read != sizeof(uint8_t) * image->gap_to_pixel_len) {
             fprintf(stderr, "Error: Unable to read pixel data from file %s\n", name);
+            free(image);
+            free(color_table);
+            if(image->flags[RGB_TRIPLE])
+                free(color_table_temp);
+            free(gap_to_pixel);
             exit(3);
         }
         image->gap_to_pixel = gap_to_pixel;
@@ -195,6 +227,13 @@ Image* read_image(char name[]) {
     items_read = fread(pixel_data, sizeof(uint8_t), image_size, file_pointer);
     if(items_read != image_size) {
         fprintf(stderr, "Error: Unable to read pixel data from file %s\n", name);
+        free(image);
+        free(color_table);
+        if(image->flags[RGB_TRIPLE])
+            free(color_table_temp);
+        if(image->flags[GAP_TO_PIXEL])
+            free(gap_to_pixel);
+        free(pixel_data);
         exit(3);
     }
     image->pixel_data = pixel_data;
@@ -206,6 +245,14 @@ Image* read_image(char name[]) {
     items_read = fread(rest_of_img, bytes_left, 1, file_pointer);
     if(items_read != 1 && bytes_left != 0) {
         fprintf(stderr, "Error: Unable to read data after pixel data from file %s\n", name);
+        free(image);
+        free(color_table);
+        if(image->flags[RGB_TRIPLE])
+            free(color_table_temp);
+        if(image->flags[GAP_TO_PIXEL])
+            free(gap_to_pixel);
+        free(pixel_data);
+        free(rest_of_img);
         exit(3);
     }
     image->rest_of_img = rest_of_img;
