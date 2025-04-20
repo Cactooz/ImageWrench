@@ -7,6 +7,7 @@ typedef enum {
 	MAIN,
 	BLUR,
 	SHARPEN,
+	OUTLINE,
 	OPTION,
 	APPLY,
 	EXIT

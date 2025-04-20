@@ -15,9 +15,10 @@
 MenuOption main_menu_options[] = {
 	{"Blur", BLUR, -1, -1, -1, -1},
 	{"Sharpen", SHARPEN, -1, -1, -1, -1},
+	{"Outline", OUTLINE, -1, -1, -1, -1},
 	{"Save & Exit", EXIT, -1, -1, -1, -1}
 };
-const int main_menu_options_count = 3;
+const int main_menu_options_count = 4;
 
 MenuOption kernel_menu_options[] = {
 	{"Kernel Size", OPTION, 7, 3, 11, 2},
@@ -43,6 +44,10 @@ void menu(Image* image) {
 				break;
 			case SHARPEN:
 				choice = display_menu(SHARPEN, "Sharpen Image", kernel_menu_options, kernel_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case OUTLINE:
+				choice = display_menu(OUTLINE, "Outline Image", kernel_menu_options, kernel_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case EXIT:

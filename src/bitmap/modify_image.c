@@ -22,6 +22,9 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 		case SHARPEN:
 			kernel = create_sharpen_kernel(kernel_size);
 			break;
+		case OUTLINE:
+			kernel = create_outline_kernel(kernel_size);
+			break;
 		default:
 			fprintf(stderr, "Error: Invalid kernel.");
 			exit(10);
