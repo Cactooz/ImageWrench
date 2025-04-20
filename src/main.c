@@ -13,8 +13,10 @@ int main(int argc, char* argv[]) {
 	char* file_extension;
 	char* file_ending = "-modified.bmp";
 
-	if (argc < 2) {
-		fprintf(stderr, "Usage: %s <image_path>\n", argv[0]);
+	if(argc < 2) {
+		fprintf(stderr, "Usage: %s <image_path> <output_path>\n\timage_path: path to a .bmp image file\n", argv[0]);
+		fprintf(stderr, "\timage_path: path to a .bmp image file\n");
+		fprintf(stderr, "\toutput_path: path for the output .bmp image file (Optional)\n");
 		return 1;
 	}
 
@@ -26,14 +28,18 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	file_extension = strrchr(argv[1], '.');
-	name_len = file_extension - argv[1];
-	modify_len = strlen(file_ending);
-	save_name = malloc(name_len + modify_len + 1);
-	strncpy(save_name, argv[1], name_len);
-	save_name[name_len] = '\0';
-	strcat(save_name, file_ending);
-	save_name[name_len + modify_len] = '\0';
+	if(argc >= 3) {
+		save_name = argv[2];
+	} else {
+		file_extension = strrchr(argv[1], '.');
+		name_len = file_extension - argv[1];
+		modify_len = strlen(file_ending);
+		save_name = malloc(name_len + modify_len + 1);
+		strncpy(save_name, argv[1], name_len);
+		save_name[name_len] = '\0';
+		strcat(save_name, file_ending);
+		save_name[name_len + modify_len] = '\0';
+	}
 
 	printf("Saving modified file to %s\n", save_name);
 	write_image(save_name, image);
