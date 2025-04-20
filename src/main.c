@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[]) {
 	Image* image;
-	int name_len;
+	int name_len, modify_len;
 	char* save_name;
 	char* file_extension;
 	char* file_ending = "-modified.bmp";
@@ -24,11 +24,12 @@ int main(int argc, char* argv[]) {
 
 	file_extension = strrchr(argv[1], '.');
 	name_len = file_extension - argv[1];
-	save_name = malloc(name_len + strlen(file_ending) + 1);
+	modify_len = strlen(file_ending);
+	save_name = malloc(name_len + modify_len + 1);
 	strncpy(save_name, argv[1], name_len);
 	save_name[name_len] = '\0';
 	strcat(save_name, file_ending);
-	save_name[name_len + 14] = '\0';
+	save_name[name_len + modify_len] = '\0';
 
 	printf("Saving modified file to %s", save_name);
 	write_image(save_name, image);
