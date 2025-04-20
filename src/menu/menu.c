@@ -46,6 +46,18 @@ void menu(Image* image) {
 	Menu current_menu = MAIN;
 	MenuOption choice;
 
+	#ifndef _WIN32
+		struct termios old_terminal_interface, new_terminal_interface;
+
+		/* Save current terminal settings */
+		tcgetattr(STDIN_FILENO, &old_terminal_interface);
+		new_terminal_interface = old_terminal_interface;
+		/* Disable waiting and echo */
+		new_terminal_interface.c_lflag &= (~ICANON & ~ECHO);
+		/* Apply new terminal settings */
+		tcsetattr(STDIN_FILENO, TCSANOW, &new_terminal_interface);
+	#endif
+
 	while(running) {
 		switch(current_menu) {
 			case MAIN:
@@ -76,6 +88,9 @@ void menu(Image* image) {
 	clear_screen();
 	
 	#ifndef _WIN32
+		/* Restore old terminal settings */
+		tcsetattr(STDIN_FILENO, TCSANOW, &old_terminal_interface);
+
 		/* Restore terminal and show cursor */
 		printf("\033[?25h");
 		fflush(stdout);
@@ -105,19 +120,8 @@ int get_key(void) {
 	#ifdef _WIN32
 		return _getch();
 	#else
-		struct termios old_terminal_interface, new_terminal_interface;
-		int c = 0;
-
-		/* Save current terminal settings */
-		tcgetattr(STDIN_FILENO, &old_terminal_interface);
-		new_terminal_interface = old_terminal_interface;
-		/* Disable waiting and echo */
-		new_terminal_interface.c_lflag &= (~ICANON & ~ECHO);
-		/* Apply new terminal settings */
-		tcsetattr(STDIN_FILENO, TCSANOW, &new_terminal_interface);
-
 		/* Checks for ESC (arrow key escape sequence) */
-		c = getchar();
+		int c = getchar();
 		if (c == 27) {
 			c = getchar();
 			if(c == '[') {
@@ -125,8 +129,6 @@ int get_key(void) {
 			}
 		}
 
-		/* Restore old terminal settings */
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_terminal_interface);
 		return c;
 	#endif
 }
