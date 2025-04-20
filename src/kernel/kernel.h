@@ -11,5 +11,6 @@ float** create_sharpen_kernel(int size);
 float** create_guassian_sharpen_kernel(int size);
 float** create_outline_kernel(int size);
 float** create_emboss_kernel(int size, int direction);
+float** create_sobel_kernel(int size, int direction);
 
 #endif

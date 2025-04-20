@@ -36,8 +36,11 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_subtype, int kernel
 		case EMBOSS:
 			kernel = create_emboss_kernel(kernel_size, kernel_subtype);
 			break;
+		case SOBEL:
+			kernel = create_sobel_kernel(kernel_size, kernel_subtype);
+			break;
 		default:
-			fprintf(stderr, "Error: Invalid kernel.");
+			fprintf(stderr, "Internal Error: Invalid kernel.");
 			exit(10);
 	}
 

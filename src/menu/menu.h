@@ -9,6 +9,7 @@ typedef enum {
 	SHARPEN,
 	OUTLINE,
 	EMBOSS,
+	SOBEL,
 	OPTION_SIZE,
 	OPTION_TYPE,
 	APPLY,
