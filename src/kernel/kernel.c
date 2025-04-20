@@ -94,3 +94,30 @@ float** create_outline_kernel(int size) {
 	kernel[center][center] -= 1;
 	return kernel;
 }
+
+float** create_emboss_kernel(int size, int direction) {
+	float** kernel = create_kernel(size);
+	int center = size / 2;
+	int i, j, di, dj;
+	int flipper_left_right = (direction == 0 || direction == 2) ? 1 : -1;
+	int flipper_up_down = (direction == 0 || direction == 1) ? 1 : -1;
+
+    for(i = 0; i < size; i++) {
+        for(j = 0; j < size; j++) {
+            di = (float)(i - center);
+            dj = (float)(j - center);
+
+            if(di == flipper_up_down * dj) {
+                kernel[i][j] = (di > 0) ? flipper_left_right * 2.0f : flipper_left_right * -2.0f;
+            } else if (di == 0 || dj == 0) {
+                kernel[i][j] = (di + (flipper_up_down * dj) > 0) ? flipper_left_right * 1.0f : flipper_left_right *  -1.0f;
+            } else {
+				kernel[i][j] = 0.0f;
+			}
+        }
+    }
+
+	kernel[center][center] = 1.0f;
+
+	return kernel;
+}

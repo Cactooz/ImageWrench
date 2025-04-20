@@ -16,17 +16,25 @@ MenuOption main_menu_options[] = {
 	{"Blur", BLUR},
 	{"Sharpen", SHARPEN},
 	{"Outline", OUTLINE},
+	{"Emobss", EMBOSS},
 	{"Save & Exit", EXIT}
 };
-const int main_menu_options_count = 4;
+const int main_menu_options_count = 5;
 
 MenuOption kernel_menu_options[] = {
+	{"Kernel Size", OPTION_SIZE},
+	{"Apply Filter", APPLY},
+	{"Back", MAIN}
+};
+const int kernel_menu_options_count = 3;
+
+MenuOption variable_kernel_menu_options[] = {
 	{"Kernel Size", OPTION_SIZE},
 	{"Kernel Type", OPTION_TYPE},
 	{"Apply Filter", APPLY},
 	{"Back", MAIN}
 };
-const int kernel_menu_options_count = 4;
+const int variable_kernel_menu_options_count = 4;
 
 int kernel_size = 7;
 int kernel_min_size = 3;
@@ -40,6 +48,10 @@ KernelType selected_blur_type = STANDARD;
 const char* sharpen_types[] = {"Standard", "Gaussian"};
 const int sharpen_types_count = 2;
 KernelType selected_sharpen_type = STANDARD;
+
+const char* emboss_directions[] = {"Top Left", "Top Right", "Bottom Right", "Bottom Left"};
+const int directions = 4;
+int selected_emboss_direction = 0;
 
 int image_changed = 0;
 
@@ -67,15 +79,19 @@ int menu(Image* image) {
 				current_menu = choice.menu;
 				break;
 			case BLUR:
-				choice = display_menu(BLUR, "Blur Image", kernel_menu_options, kernel_menu_options_count, image);
+				choice = display_menu(BLUR, "Blur Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case SHARPEN:
-				choice = display_menu(SHARPEN, "Sharpen Image", kernel_menu_options, kernel_menu_options_count, image);
+				choice = display_menu(SHARPEN, "Sharpen Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case OUTLINE:
 				choice = display_menu(OUTLINE, "Outline Image", kernel_menu_options, kernel_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case EMBOSS:
+				choice = display_menu(EMBOSS, "Emboss Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case EXIT:
@@ -157,10 +173,12 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			if(options[i].menu == OPTION_SIZE) {
 				print_variable_menu(kernel_min_size, kernel_max_size, ((kernel_max_size - kernel_min_size) / kernel_step_size) + 1, kernel_size);
 			} else if(options[i].menu == OPTION_TYPE) {
-				if (current_menu == BLUR) {
+				if(current_menu == BLUR) {
 					print_type_selector(blur_types, blur_types_count, selected_blur_type);
-				} else if (current_menu == SHARPEN) {
+				} else if(current_menu == SHARPEN) {
 					print_type_selector(sharpen_types, sharpen_types_count, selected_sharpen_type);
+				} else if(current_menu == EMBOSS) {
+					print_type_selector(emboss_directions, directions, selected_emboss_direction);
 				}
 			}
 			printf("\n");
@@ -193,6 +211,8 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 						selected_blur_type--;
 					} else if(current_menu == SHARPEN && selected_sharpen_type > 0) {
 						selected_sharpen_type--;
+					} else if(current_menu == EMBOSS && selected_emboss_direction > 0) {
+						selected_emboss_direction--;
 					}
 				}
 				break;
@@ -207,6 +227,8 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 						selected_blur_type++;
 					} else if(current_menu == SHARPEN && selected_sharpen_type < sharpen_types_count - 1) {
 						selected_sharpen_type++;
+					} else if(current_menu == EMBOSS && selected_emboss_direction < directions - 1) {
+						selected_emboss_direction++;
 					}
 				}
 				break;
@@ -222,6 +244,8 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 						kernel_subtype = selected_blur_type;
 					} else if(current_menu == SHARPEN) {
 						kernel_subtype = selected_sharpen_type;
+					} else if(current_menu == EMBOSS) {
+						kernel_subtype = selected_emboss_direction;
 					}
 
 					apply_kernel(image, current_menu, kernel_subtype, kernel_size);

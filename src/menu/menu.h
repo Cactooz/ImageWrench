@@ -8,6 +8,7 @@ typedef enum {
 	BLUR,
 	SHARPEN,
 	OUTLINE,
+	EMBOSS,
 	OPTION_SIZE,
 	OPTION_TYPE,
 	APPLY,

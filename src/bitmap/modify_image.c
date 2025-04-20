@@ -6,7 +6,7 @@
 #include "../menu/menu.h"
 #include "../kernel/kernel.h"
 
-void apply_kernel(Image* image, Menu kernel_type, KernelType kernel_subtype, int kernel_size) {
+void apply_kernel(Image* image, Menu kernel_type, int kernel_subtype, int kernel_size) {
 	float** kernel;
 	uint32_t** pixels;
 	uint32_t** result;
@@ -32,6 +32,9 @@ void apply_kernel(Image* image, Menu kernel_type, KernelType kernel_subtype, int
 			break;
 		case OUTLINE:
 			kernel = create_outline_kernel(kernel_size);
+			break;
+		case EMBOSS:
+			kernel = create_emboss_kernel(kernel_size, kernel_subtype);
 			break;
 		default:
 			fprintf(stderr, "Error: Invalid kernel.");
