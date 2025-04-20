@@ -21,9 +21,11 @@ MenuOption main_menu_options[] = {
 	{"Hue-shift", HUE},
 	{"Saturation", SATURATION},
 	{"Brightness", BRIGHTNESS},
+	{"Invert Color", INVERT},
+	{"Gray Scale", GRAYSCALE},
 	{"Save & Exit", EXIT}
 };
-const int main_menu_options_count = 9;
+const int main_menu_options_count = 11;
 
 MenuOption kernel_menu_options[] = {
 	{"Kernel Size", OPTION_SIZE},
@@ -46,6 +48,12 @@ MenuOption color_menu_options[] = {
 	{"Back", MAIN}
 };
 const int color_menu_options_count = 3;
+
+MenuOption apply_only_option[] = {
+	{"Apply", APPLY},
+	{"Back", MAIN}
+};
+const int apply_only_option_count = 2;
 
 int kernel_size = 7;
 const int kernel_min_size = 3;
@@ -128,6 +136,14 @@ int menu(Image* image) {
 				break;
 			case BRIGHTNESS:
 				choice = display_menu(BRIGHTNESS, "Change Image Brightness", color_menu_options, color_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case INVERT:
+				choice = display_menu(INVERT, "Invert Image Colors", apply_only_option, apply_only_option_count, image);
+				current_menu = choice.menu;
+				break;
+			case GRAYSCALE:
+				choice = display_menu(GRAYSCALE, "Grayscale Image", apply_only_option, apply_only_option_count, image);
 				current_menu = choice.menu;
 				break;
 			case EXIT:
@@ -297,7 +313,7 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			case 10:
 			case 13:
 				if(options[selected].menu == APPLY) {
-					if(current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) {
+					if(current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS || current_menu == INVERT || current_menu == GRAYSCALE) {
 						printf(" =========================================\n");
 						printf(" | Applying color operation, please wait |\n");
 						printf(" =========================================\n");
@@ -311,6 +327,12 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 								break;
 							case BRIGHTNESS:
 								apply_brightness(image, color_shift, color_shift_step_count);
+								break;
+							case INVERT:
+								apply_inverted_colors(image);
+								break;
+							case GRAYSCALE:
+								apply_gray_scale(image);
 								break;
 							default:
 								break;

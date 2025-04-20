@@ -174,3 +174,54 @@ void apply_hsl_modification(Image* image, int amount, int step_count, HSLModific
 
 	array_to_pixel_data(image, pixels);
 }
+
+void apply_inverted_colors(Image* image) {
+    apply_color_change(image, EFFECT_INVERT);
+}
+
+
+void apply_gray_scale(Image* image) {
+    apply_color_change(image, EFFECT_GRAYSCALE);
+}
+
+void apply_color_change(Image* image, HSLEffect modification) {
+	uint32_t height, width, i, j, argb;
+    uint32_t** pixels = pixel_data_to_array(image);
+    float h, s, l;
+    uint8_t a;
+
+    if (image->flags[INFO_HEADER]) {
+        height = image->bm_info_header.height;
+        width = image->bm_info_header.width;
+    } else {
+        height = image->bm_core_header.height;
+        width = image->bm_core_header.width;
+    }
+
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+			/* Get the pixels in HSL */
+            rgb_to_hsl(pixels[i][j], &h, &s, &l, &a);
+
+            switch(modification) {
+                case EFFECT_INVERT:
+					/* Invert the hue and solve roll over shift */
+                    h += 180.0f;
+                    if (h >= 360.0f) {
+                        h -= 360.0f;
+                    }
+                    break;
+                case EFFECT_GRAYSCALE:
+                    /* Set saturation to 0 */
+                    s = 0.0f;
+                    break;
+            }
+
+            /* Convert back to RGB and update pixel */
+            hsl_to_rgb(h, s, l, a, &argb);
+            pixels[i][j] = argb;
+        }
+    }
+
+    array_to_pixel_data(image, pixels);
+}
