@@ -13,19 +13,24 @@
 #endif
 
 MenuOption main_menu_options[] = {
-	{"Blur", BLUR, -1, -1, -1, -1},
-	{"Sharpen", SHARPEN, -1, -1, -1, -1},
-	{"Outline", OUTLINE, -1, -1, -1, -1},
-	{"Save & Exit", EXIT, -1, -1, -1, -1}
+	{"Blur", BLUR},
+	{"Sharpen", SHARPEN},
+	{"Outline", OUTLINE},
+	{"Save & Exit", EXIT}
 };
 const int main_menu_options_count = 4;
 
 MenuOption kernel_menu_options[] = {
-	{"Kernel Size", OPTION, 7, 3, 11, 2},
-	{"Apply Filter", APPLY, -1, -1, -1, -1},
-	{"Back", MAIN, -1, -1, -1, -1}
+	{"Kernel Size", OPTION},
+	{"Apply Filter", APPLY},
+	{"Back", MAIN}
 };
 const int kernel_menu_options_count = 3;
+
+int kernel_size = 7;
+int kernel_min_size = 1;
+int kernel_max_size = 11;
+int kernel_step_size = 2;
 
 void menu(Image* image) {
 	int running = 1;
@@ -118,7 +123,7 @@ int get_key(void) {
 }
 
 MenuOption display_menu(Menu current_menu, const char* title, MenuOption* options, int option_count, Image* image) {
-	int key, i, kernel_size;
+	int key, i;
 	int selected = 0;
 
 	while(1) {
@@ -133,14 +138,10 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 
 			printf("%s ", options[i].title);
 
-			if(options[i].option > 0) {
-				print_variable_menu(options[i].min, options[i].max, ((options[i].max - options[i].min) / options[i].step_size) + 1, options[i].option);
+			if(options[i].menu == OPTION) {
+				print_variable_menu(kernel_min_size, kernel_max_size, ((kernel_max_size - kernel_min_size) / kernel_step_size) + 1, kernel_size);
 			}
 			printf("\n");
-
-			if(options[i].menu == OPTION) {
-				kernel_size = options[i].option;
-			}
 		}
 		fflush(stdout);
 
@@ -163,16 +164,16 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			case 68:
 			case 75:
 			case 'a':
-				if(options->option > options->min) {
-					options->option -= options->step_size;
+				if(kernel_size > kernel_min_size) {
+					kernel_size -= kernel_step_size;
 				}
 				break;
 			/* Right arrow or d to increase option */
 			case 67:
 			case 77:
 			case 'd':
-				if(options->option < options->max) {
-					options->option += options->step_size;
+				if(kernel_size < kernel_max_size) {
+					kernel_size += kernel_step_size;
 				}
 				break;
 			/* LF and CR to exit/enter menu */

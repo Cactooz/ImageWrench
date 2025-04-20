@@ -80,7 +80,7 @@ float** create_sharpen_kernel(int size) {
 	return kernel;
 }
 
-float** createGaussianSharpenKernel(int size) {
+float** create_guassian_sharpen_kernel(int size) {
 	float** kernel = create_guassian_blur_kernel(size);
 	int center = size / 2;
 	invert_kernel(kernel, size);

@@ -16,10 +16,6 @@ typedef enum {
 typedef struct {
 	char* title;
 	Menu menu;
-	int option;
-	int min;
-	int max;
-	int step_size;
 } MenuOption;
 
 void menu(Image* image);
