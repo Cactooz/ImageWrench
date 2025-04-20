@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[]) {
 	Image* image;
-	int name_len, modify_len;
+	int name_len, modify_len, image_changed;
 	char* save_name;
 	char* file_extension;
 	char* file_ending = "-modified.bmp";
@@ -20,7 +20,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	image = read_image(argv[1]);
-	menu(image);
+	image_changed = menu(image);
+
+	if(!image_changed) {
+		printf("No changes were applied to the image.\n");
+		return 0;
+	}
 
 	file_extension = strrchr(argv[1], '.');
 	name_len = file_extension - argv[1];
@@ -31,7 +36,7 @@ int main(int argc, char* argv[]) {
 	strcat(save_name, file_ending);
 	save_name[name_len + modify_len] = '\0';
 
-	printf("Saving modified file to %s", save_name);
+	printf("Saving modified file to %s\n", save_name);
 	write_image(save_name, image);
 	free(save_name);
 

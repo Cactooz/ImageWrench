@@ -41,7 +41,9 @@ const char* sharpen_types[] = {"Standard", "Gaussian"};
 const int sharpen_types_count = 2;
 KernelType selected_sharpen_type = STANDARD;
 
-void menu(Image* image) {
+int image_changed = 0;
+
+int menu(Image* image) {
 	int running = 1;
 	Menu current_menu = MAIN;
 	MenuOption choice;
@@ -95,6 +97,8 @@ void menu(Image* image) {
 		printf("\033[?25h");
 		fflush(stdout);
 	#endif
+
+	return image_changed;
 }
 
 void clear_screen(void) {
@@ -221,6 +225,7 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 					}
 
 					apply_kernel(image, current_menu, kernel_subtype, kernel_size);
+					image_changed++;
 				} else if(options[selected].menu == OPTION_SIZE) {
 					break;
 				}

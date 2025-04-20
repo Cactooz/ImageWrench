@@ -24,7 +24,7 @@ typedef struct {
 	Menu menu;
 } MenuOption;
 
-void menu(Image* image);
+int menu(Image* image);
 void clear_screen(void);
 int get_key(void);
 MenuOption display_menu(Menu current_menu, const char* title, MenuOption* options, int option_count, Image* image);
