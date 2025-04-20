@@ -10,6 +10,9 @@ typedef enum {
 	OUTLINE,
 	EMBOSS,
 	SOBEL,
+	HUE,
+	SATURATION,
+	BRIGHTNESS,
 	OPTION_SIZE,
 	OPTION_TYPE,
 	APPLY,
@@ -32,5 +35,6 @@ int get_key(void);
 MenuOption display_menu(Menu current_menu, const char* title, MenuOption* options, int option_count, Image* image);
 void print_variable_menu(int min, int max, int steps, int current);
 void print_type_selector(const char** type_names, int type_count, int current_index);
+void print_variable_color_shifter_menu(int min, int max, int current);
 
 #endif

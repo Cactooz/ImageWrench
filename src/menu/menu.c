@@ -18,9 +18,12 @@ MenuOption main_menu_options[] = {
 	{"Outline", OUTLINE},
 	{"Emboss", EMBOSS},
 	{"Sobel", SOBEL},
+	{"Hue-shift", HUE},
+	{"Saturation", SATURATION},
+	{"Brightness", BRIGHTNESS},
 	{"Save & Exit", EXIT}
 };
-const int main_menu_options_count = 6;
+const int main_menu_options_count = 9;
 
 MenuOption kernel_menu_options[] = {
 	{"Kernel Size", OPTION_SIZE},
@@ -37,10 +40,17 @@ MenuOption variable_kernel_menu_options[] = {
 };
 const int variable_kernel_menu_options_count = 4;
 
+MenuOption color_menu_options[] = {
+	{"Shift", OPTION_SIZE},
+	{"Apply", APPLY},
+	{"Back", MAIN}
+};
+const int color_menu_options_count = 3;
+
 int kernel_size = 7;
-int kernel_min_size = 3;
-int kernel_max_size = 11;
-int kernel_step_size = 2;
+const int kernel_min_size = 3;
+const int kernel_max_size = 11;
+const int kernel_step_size = 2;
 
 const char* blur_types[] = {"Box", "Guassian"};
 const int blur_types_count = 2;
@@ -55,8 +65,13 @@ const int directions = 4;
 const char* emboss_directions[] = {"Top Left", "Top Right", "Bottom Right", "Bottom Left"};
 int selected_emboss_direction = 0;
 
-const char* sobel_directions[] = {"Top", "Left", "Bottom", "Right"};
+const char* sobel_directions[] = {"Top", "Right", "Bottom", "Left"};
 int selected_sobel_direction = 0;
+
+int color_shift = 0;
+const int color_shift_min = -5;
+const int color_shift_max = 5;
+const int color_shift_step_count = 10;
 
 int image_changed = 0;
 
@@ -101,6 +116,18 @@ int menu(Image* image) {
 				break;
 			case SOBEL:
 				choice = display_menu(SOBEL, "Sobel Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case HUE:
+				choice = display_menu(HUE, "Hue Shift Image", color_menu_options, color_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case SATURATION:
+				choice = display_menu(SATURATION, "Change Image Saturation", color_menu_options, color_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case BRIGHTNESS:
+				choice = display_menu(BRIGHTNESS, "Change Image Brightness", color_menu_options, color_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case EXIT:
@@ -180,7 +207,11 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			printf("%s ", options[i].title);
 
 			if(options[i].menu == OPTION_SIZE) {
-				print_variable_menu(kernel_min_size, kernel_max_size, ((kernel_max_size - kernel_min_size) / kernel_step_size) + 1, kernel_size);
+				if(current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) {
+					print_variable_color_shifter_menu(color_shift_min, color_shift_max, color_shift);
+				} else {
+					print_variable_menu(kernel_min_size, kernel_max_size, ((kernel_max_size - kernel_min_size) / kernel_step_size) + 1, kernel_size);
+				}
 			} else if(options[i].menu == OPTION_TYPE) {
 				switch(current_menu) {
 					case(BLUR):
@@ -222,8 +253,12 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			case 68:
 			case 75:
 			case 'a':
-				if(options[selected].menu == OPTION_SIZE && kernel_size > kernel_min_size) {
-					kernel_size -= kernel_step_size;
+				if(options[selected].menu == OPTION_SIZE) {
+					if((current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) && color_shift > color_shift_min) {
+						color_shift--;
+					} else if(kernel_size > kernel_min_size) {
+						kernel_size -= kernel_step_size;
+					}
 				} else if(options[selected].menu == OPTION_TYPE) {
 					if(current_menu == BLUR && selected_blur_type > 0) {
 						selected_blur_type--;
@@ -240,8 +275,12 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			case 67:
 			case 77:
 			case 'd':
-				if(options[selected].menu == OPTION_SIZE && kernel_size < kernel_max_size) {
-					kernel_size += kernel_step_size;
+				if(options[selected].menu == OPTION_SIZE) {
+					if((current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) && color_shift < color_shift_max) {
+						color_shift++;
+					} else if(kernel_size < kernel_max_size) {
+						kernel_size += kernel_step_size;
+					}
 				} else if(options[selected].menu == OPTION_TYPE) {
 					if(current_menu == BLUR && selected_blur_type < blur_types_count - 1) {
 						selected_blur_type++;
@@ -258,30 +297,51 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 			case 10:
 			case 13:
 				if(options[selected].menu == APPLY) {
-					printf(" ================================\n");
-					printf(" | Applying kernel, please wait |\n");
-					printf(" ================================\n");
+					if(current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) {
+						printf(" =========================================\n");
+						printf(" | Applying color operation, please wait |\n");
+						printf(" =========================================\n");
 
-					switch(current_menu) {
-						case BLUR:
-							kernel_subtype = selected_blur_type;
-							break;
-						case SHARPEN:
-							kernel_subtype = selected_sharpen_type;
-							break;
-						case EMBOSS:
-							kernel_subtype = selected_emboss_direction;
-							break;
-						case SOBEL:
-							kernel_subtype = selected_sobel_direction;
-							break;
-						default:
-							break;
+						switch(current_menu) {
+							case HUE:
+								apply_hue_shift(image, color_shift, color_shift_step_count);
+								break;
+							case SATURATION:
+								apply_saturation(image, color_shift, color_shift_step_count);
+								break;
+							case BRIGHTNESS:
+								apply_brightness(image, color_shift, color_shift_step_count);
+								break;
+							default:
+								break;
+						}
+						image_changed++;
+					} else {
+						printf(" ================================\n");
+						printf(" | Applying kernel, please wait |\n");
+						printf(" ================================\n");
+
+						switch(current_menu) {
+							case BLUR:
+								kernel_subtype = selected_blur_type;
+								break;
+							case SHARPEN:
+								kernel_subtype = selected_sharpen_type;
+								break;
+							case EMBOSS:
+								kernel_subtype = selected_emboss_direction;
+								break;
+							case SOBEL:
+								kernel_subtype = selected_sobel_direction;
+								break;
+							default:
+								break;
+						}
+						
+						apply_kernel(image, current_menu, kernel_subtype, kernel_size);
+						image_changed++;
 					}
-					
-					apply_kernel(image, current_menu, kernel_subtype, kernel_size);
-					image_changed++;
-				} else if(options[selected].menu == OPTION_SIZE) {
+				} else if(options[selected].menu == OPTION_SIZE  || options[selected].menu == OPTION_TYPE) {
 					break;
 				}
 				return options[selected];
@@ -331,11 +391,47 @@ void print_type_selector(const char** type_names, int type_count, int current_in
 		printf("  ");
 	}
 
-	printf("[%s]", type_names[current_index]);
+	printf("[ %s ]", type_names[current_index]);
 
 	if (current_index < type_count - 1) {
 		printf(" >");
 	} else {
 		 printf("  ");
+	}
+}
+
+void print_variable_color_shifter_menu(int min, int max, int current) {
+	int i;
+
+	if(current != min) {
+		printf("< ");
+	} else {
+		printf("  ");
+	}
+
+	/* Print start of menu leading up to current value */
+	printf("[");
+	for(i = min; i < current; i++) {
+		printf("-");
+	}
+
+	/* Print the current value */
+	if(current < 0) {
+		printf(" ");
+	} else if(current == 0) {
+		printf("  ");
+	} else {
+		printf(" +");
+	}
+	printf("%d ", current);
+
+	/* Print the remaining part of the menu */
+	for(i = current; i < max; i++) {
+		printf("-");
+	}
+	printf("]");
+
+	if(current != max) {
+		printf(" >");
 	}
 }

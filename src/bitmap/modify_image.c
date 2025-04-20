@@ -5,6 +5,7 @@
 #include "read_image.h"
 #include "../menu/menu.h"
 #include "../kernel/kernel.h"
+#include "../color/color.h"
 
 void apply_kernel(Image* image, Menu kernel_type, int kernel_subtype, int kernel_size) {
 	float** kernel;
@@ -101,4 +102,75 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_subtype, int kernel
 	}
 	free(pixels);
 	free_kernel(kernel, kernel_size);
+}
+
+void apply_hue_shift(Image* image, int amount, int step_count) {
+	apply_hsl_modification(image, amount, step_count, MODIFY_HUE);
+}
+
+void apply_saturation(Image* image, int amount, int step_count) {
+	apply_hsl_modification(image, amount, step_count, MODIFY_SATURATION);
+}
+
+void apply_brightness(Image* image, int amount, int step_count) {
+	apply_hsl_modification(image, amount, step_count, MODIFY_BRIGHTNESS);
+}
+
+void apply_hsl_modification(Image* image, int amount, int step_count, HSLModification modification) {
+	uint32_t height, width, i, j, argb;
+	uint32_t** pixels = pixel_data_to_array(image);
+	float step_size, modification_amount, h, s, l;
+	uint8_t a;
+
+	if (image->flags[INFO_HEADER]) {
+		height = image->bm_info_header.height;
+		width = image->bm_info_header.width;
+	} else {
+		height = image->bm_core_header.height;
+		width = image->bm_core_header.width;
+	}
+
+	if (modification == MODIFY_HUE) {
+		step_size = 360.0f / step_count;
+		modification_amount = step_size * amount;
+	} else {
+		step_size = 1.0f / step_count;
+		modification_amount = step_size * amount;
+	}
+
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			/* Get the pixels in HSL */
+			rgb_to_hsl(pixels[i][j], &h, &s, &l, &a);
+
+			switch(modification) {
+				case MODIFY_HUE:
+					/* Shift the hue and solve roll over shift */
+					h += modification_amount;
+					while(h >= 360.0f) {
+						h -= 360.0f;
+					}
+					while(h < 0.0f) {
+						h += 360.0f;
+					}
+					break;
+				case MODIFY_SATURATION:
+					/* Change saturation and clamp */
+					s += modification_amount;
+					s = (s < 0.0f) ? 0.0f : ((s > 1.0f) ? 1.0f : s);
+					break;
+				case MODIFY_BRIGHTNESS:
+					/* Change brightness and clamp */
+					l += modification_amount;
+					l = (l < 0.0f) ? 0.0f : ((l > 1.0f) ? 1.0f : l);
+					break;
+			}
+
+			/* Convert back to RGB and update pixel */
+			hsl_to_rgb(h, s, l, a, &argb);
+			pixels[i][j] = argb;
+		}
+	}
+
+	array_to_pixel_data(image, pixels);
 }

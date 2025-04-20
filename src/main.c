@@ -5,7 +5,6 @@
 #include "bitmap/read_image.h"
 #include "bitmap/write_image.h"
 #include "menu/menu.h"
-#include "kernel/kernel.h"
 
 int main(int argc, char* argv[]) {
 	Image* image;
