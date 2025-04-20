@@ -6,7 +6,7 @@
 #include "../menu/menu.h"
 #include "../kernel/kernel.h"
 
-void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
+void apply_kernel(Image* image, Menu kernel_type, KernelType kernel_subtype, int kernel_size) {
 	float** kernel;
 	uint32_t** pixels;
 	uint32_t** result;
@@ -17,10 +17,18 @@ void apply_kernel(Image* image, Menu kernel_type, int kernel_size) {
 
 	switch(kernel_type) {
 		case BLUR:
-			kernel = create_box_blur_kernel(kernel_size);
+			if(kernel_subtype == GAUSSIAN) {
+				kernel = create_guassian_blur_kernel(kernel_size);
+			} else {
+				kernel = create_box_blur_kernel(kernel_size);
+			}
 			break;
 		case SHARPEN:
-			kernel = create_sharpen_kernel(kernel_size);
+			if(kernel_subtype == GAUSSIAN) {
+				kernel = create_guassian_sharpen_kernel(kernel_size);
+			} else {
+				kernel = create_sharpen_kernel(kernel_size);
+			}
 			break;
 		case OUTLINE:
 			kernel = create_outline_kernel(kernel_size);

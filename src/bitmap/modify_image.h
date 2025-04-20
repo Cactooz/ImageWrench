@@ -5,6 +5,6 @@
 #include "read_image.h"
 #include "../menu/menu.h"
 
-void apply_kernel(Image* image, Menu kernel_type, int kernel_size);
+void apply_kernel(Image* image, Menu kernel_type, KernelType kernel_subtype, int kernel_size);
 
 #endif

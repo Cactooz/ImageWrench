@@ -47,7 +47,7 @@ float** create_guassian_blur_kernel(int size) {
 	int center = size / 2;
 	int i, j, di, dj;
 	float value;
-	float sigma = size / (size / 1.5);
+	float sigma = size / 1.8f;
 	for(i = 0; i < size; i++) {
 		for(j = 0; j < size; j++) {
 			di = i - center;
