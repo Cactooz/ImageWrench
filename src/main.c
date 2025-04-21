@@ -31,10 +31,9 @@ int main(int argc, char* argv[]) {
 
 	if(argc >= 3) {
 		save_name = argv[2];
-		test_file = fopen(save_name, "w");
+		test_file = fopen(save_name, "a");
 		if(test_file == NULL) {
 			fprintf(stderr, "Error: Invalid output path '%s'\n", save_name);
-			fclose(test_file);
 			return 1;
 		}
 		fclose(test_file);
