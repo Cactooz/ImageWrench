@@ -7,51 +7,82 @@
 void write_image(char name[], Image* image) {
     FILE *file_pointer;
     uint32_t image_size;
+    size_t items_written;
     
     file_pointer = fopen(name, "wb");
 
-    fwrite(&(image->bmp_header), sizeof(image->bmp_header), 1, file_pointer);
-
-    fwrite(&(image->dib_header_size), sizeof(image->dib_header_size), 1, file_pointer);
-
-    if(!image->flags[INFO_HEADER]) {
-        fwrite(&(image->bm_core_header), sizeof(image->bm_core_header), 1, file_pointer);
-        image_size = image->bmp_header.size - image->bmp_header.offset;
+    if (file_pointer == NULL) {
+        fprintf(stderr, "Error: Invalid output path %s\n", name);
+        free_image(image);
+        exit(5);
     }
 
+    items_written = fwrite(&(image->bmp_header), sizeof(image->bmp_header), 1, file_pointer);
+    items_written_check(items_written, 1, "Error: Unable to write bmp header to file", name, file_pointer, image);
+
+    items_written = fwrite(&(image->dib_header_size), sizeof(image->dib_header_size), 1, file_pointer);
+    items_written_check(items_written, 1, "Error: Unable to write dib header to file", name, file_pointer, image);
+
+    if(!image->flags[INFO_HEADER]) {
+        items_written = fwrite(&(image->bm_core_header), sizeof(image->bm_core_header), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write core header to file", name, file_pointer, image);
+        image_size = image->bmp_header.size - image->bmp_header.offset;
+    }
+    
+
     if(image->flags[INFO_HEADER]) {
-        fwrite(&(image->bm_info_header), sizeof(image->bm_info_header), 1, file_pointer);
+        items_written = fwrite(&(image->bm_info_header), sizeof(image->bm_info_header), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write info header to file", name, file_pointer, image);
         image_size = image->bm_info_header.image_size;
     }
 
     if(image->flags[BMv5]) {
-        fwrite(&(image->bm_v5_header), sizeof(image->bm_v5_header), 1, file_pointer);
+        items_written = fwrite(&(image->bm_v5_header), sizeof(image->bm_v5_header), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write v5 header to file", name, file_pointer, image);
     }
 
     if(image->flags[COLOR_TABLE]) {
         if(image->flags[RGB_TRIPLE]) {
-            fwrite(image->color_table_triple, sizeof(RGBTriple), image->color_table_length, file_pointer);
+            items_written = fwrite(image->color_table_triple, sizeof(RGBTriple), image->color_table_length, file_pointer);
         } else {
-            fwrite(image->color_table, sizeof(RGBQuad), image->color_table_length, file_pointer);
+            items_written = fwrite(image->color_table, sizeof(RGBQuad), image->color_table_length, file_pointer);
         }
+        items_written_check(items_written, image->color_table_length, "Error: Unable to write color table to file", name, file_pointer, image);
     }
 
     if (image->flags[BITFIELDS]) {
-        fwrite(&(image->red_mask), (sizeof(image->red_mask)), 1, file_pointer);
-        fwrite(&(image->green_mask), (sizeof(image->green_mask)), 1, file_pointer);
-        fwrite(&(image->blue_mask), (sizeof(image->blue_mask)), 1, file_pointer);
+        items_written = fwrite(&(image->red_mask), (sizeof(image->red_mask)), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write red color mask to file", name, file_pointer, image);
+        items_written = fwrite(&(image->green_mask), (sizeof(image->green_mask)), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write green color mask to file", name, file_pointer, image);
+        items_written = fwrite(&(image->blue_mask), (sizeof(image->blue_mask)), 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write blue color mask to file", name, file_pointer, image);
     }
 
     if(image->flags[GAP_TO_PIXEL]) {
-        fwrite(image->gap_to_pixel, image->gap_to_pixel_len, 1, file_pointer);
+        items_written = fwrite(image->gap_to_pixel, image->gap_to_pixel_len, 1, file_pointer);
+        items_written_check(items_written, 1, "Error: Unable to write gap to pixel data to file", name, file_pointer, image);
     }
 
-    fwrite(image->pixel_data, image_size, 1, file_pointer);
+    items_written = fwrite(image->pixel_data, image_size, 1, file_pointer);
+    items_written_check(items_written, 1, "Error: Unable to write pixel data to file", name, file_pointer, image);
 
-    fwrite(image->rest_of_img, image->bmp_header.size - image_size - image->bmp_header.offset, 1, file_pointer);
+    items_written = fwrite(image->rest_of_img, image->bmp_header.size - image_size - image->bmp_header.offset, 1, file_pointer);
+    if(image->bmp_header.size - image_size - image->bmp_header.offset != 0) {
+        items_written_check(items_written, 1, "Error: Unable to write rest of image to file", name, file_pointer, image);
+    }
 
     fclose(file_pointer);
     free_image(image);
+}
+
+void items_written_check(size_t items_written, size_t expected_items, char* msg, char* name, FILE* file_pointer, Image* image) {
+    if(items_written != expected_items) {
+        fprintf(stderr, "%s %s\n", msg, name);
+        fclose(file_pointer);
+        free_image(image);
+        exit(5);
+    }
 }
 
 void array_to_pixel_data(Image* image, uint32_t** array) {

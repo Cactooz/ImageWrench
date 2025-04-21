@@ -170,6 +170,7 @@ Image* read_image(char name[]) {
             if(image->flags[RGB_TRIPLE])
                 free(color_table_temp);
             free(image);
+            fclose(file_pointer);
             exit(3);
         }
         image->color_table = color_table;
@@ -186,6 +187,7 @@ Image* read_image(char name[]) {
             if(image->flags[RGB_TRIPLE])
                 free(color_table_temp);
             free(image);
+            fclose(file_pointer);
             exit(3);
         }
         bytes_read += sizeof(uint32_t) * 3;
@@ -201,6 +203,7 @@ Image* read_image(char name[]) {
         if(image->flags[RGB_TRIPLE])
             free(color_table_temp);
         free(image);
+        fclose(file_pointer);
         exit(4);
     }
 
@@ -218,6 +221,7 @@ Image* read_image(char name[]) {
                 free(color_table_temp);
             free(gap_to_pixel);
             free(image);
+            fclose(file_pointer);
             exit(3);
         }
         image->gap_to_pixel = gap_to_pixel;
@@ -234,6 +238,7 @@ Image* read_image(char name[]) {
             free(gap_to_pixel);
         free(pixel_data);
         free(image);
+        fclose(file_pointer);
         exit(3);
     }
     image->pixel_data = pixel_data;
@@ -253,6 +258,7 @@ Image* read_image(char name[]) {
         free(pixel_data);
         free(rest_of_img);
         free(image);
+        fclose(file_pointer);
         exit(3);
     }
     image->rest_of_img = rest_of_img;

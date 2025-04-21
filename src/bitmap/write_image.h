@@ -5,6 +5,8 @@
 
 void write_image(char name[], Image* image);
 
+void items_written_check(size_t items_written, size_t expected_items, char* msg, char* name, FILE* file_pointer, Image* image);
+
 void array_to_pixel_data(Image* image, uint32_t** array);
 
 int find_closest_color(uint32_t color, RGBQuad* color_table, uint32_t color_table_length);
