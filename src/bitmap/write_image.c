@@ -80,6 +80,7 @@ void items_written_check(size_t items_written, size_t expected_items, char* msg,
     if(items_written != expected_items) {
         fprintf(stderr, "%s %s\n", msg, name);
         fclose(file_pointer);
+        remove(name);
         free_image(image);
         exit(5);
     }
