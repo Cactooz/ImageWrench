@@ -5,4 +5,5 @@
 - 3: Unable to read from file
 - 4: Unsupported bitmap
 - 5: Unable to write to file
+- 6: Corrupt bitmap
 - 10: Invalid kernel used

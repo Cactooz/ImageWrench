@@ -228,6 +228,19 @@ Image* read_image(char name[]) {
     }
 
     pixel_data = (uint8_t *) malloc(image_size * sizeof(uint8_t));
+    /* If image size is 0, there is no image to edit */
+    if(image_size == 0) {
+        fprintf(stderr, "Error: Image size is 0, nothing to edit in %s\n", name);
+        free(color_table);
+        if(image->flags[RGB_TRIPLE])
+            free(color_table_temp);
+        if(image->flags[GAP_TO_PIXEL])
+            free(gap_to_pixel);
+        free(pixel_data);
+        free(image);
+        fclose(file_pointer);
+        exit(6);
+    }
     items_read = fread(pixel_data, sizeof(uint8_t), image_size, file_pointer);
     if(items_read != image_size) {
         fprintf(stderr, "Error: Unable to read pixel data from file %s\n", name);
