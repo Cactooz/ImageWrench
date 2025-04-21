@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 	char* file_ending = "-modified.bmp";
 
 	if(argc < 2) {
-		fprintf(stderr, "Usage: %s <image_path> <output_path>\n\timage_path: path to a .bmp image file\n", argv[0]);
+		fprintf(stderr, "Usage: %s <image_path> <output_path>\n", argv[0]);
 		fprintf(stderr, "\timage_path: path to a .bmp image file\n");
 		fprintf(stderr, "\toutput_path: path for the output .bmp image file (Optional)\n");
 		return 1;
@@ -43,7 +43,11 @@ int main(int argc, char* argv[]) {
 
 	printf("Saving modified file to %s\n", save_name);
 	write_image(save_name, image);
-	free(save_name);
+
+	/* Only free if no output path was given */
+	if(argc < 3) {
+		free(save_name);
+	}
 
 	return 0;
 }
