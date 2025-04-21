@@ -5,6 +5,8 @@
 
 typedef enum {
 	MAIN,
+	KERNEL,
+	COLOR,
 	BLUR,
 	SHARPEN,
 	OUTLINE,

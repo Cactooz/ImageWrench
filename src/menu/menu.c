@@ -13,47 +13,59 @@
 #endif
 
 MenuOption main_menu_options[] = {
+	{"Kernel Filters", KERNEL},
+	{"Color Filters", COLOR},
+	{"Save & Exit", EXIT}
+};
+const int main_menu_options_count = 3;
+
+MenuOption kernel_menu_options[] = {
 	{"Blur", BLUR},
 	{"Sharpen", SHARPEN},
-	{"Outline", OUTLINE},
 	{"Emboss", EMBOSS},
+	{"Outline", OUTLINE},
 	{"Sobel", SOBEL},
+	{"Back", MAIN}
+};
+const int kernel_menu_options_count = 6;
+
+MenuOption color_menu_options[] = {
 	{"Hue-shift", HUE},
 	{"Saturation", SATURATION},
 	{"Brightness", BRIGHTNESS},
-	{"Invert Color", INVERT},
 	{"Gray Scale", GRAYSCALE},
-	{"Save & Exit", EXIT}
-};
-const int main_menu_options_count = 11;
-
-MenuOption kernel_menu_options[] = {
-	{"Kernel Size", OPTION_SIZE},
-	{"Apply Filter", APPLY},
+	{"Invert Color", INVERT},
 	{"Back", MAIN}
 };
-const int kernel_menu_options_count = 3;
+const int color_menu_options_count = 6;
 
-MenuOption variable_kernel_menu_options[] = {
+MenuOption kernel_filter_menu_options[] = {
+	{"Kernel Size", OPTION_SIZE},
+	{"Apply Filter", APPLY},
+	{"Back", KERNEL}
+};
+const int kernel_filter_menu_options_count = 3;
+
+MenuOption variable_kernel_filter_menu_options[] = {
 	{"Kernel Size", OPTION_SIZE},
 	{"Kernel Type", OPTION_TYPE},
 	{"Apply Filter", APPLY},
-	{"Back", MAIN}
+	{"Back", KERNEL}
 };
-const int variable_kernel_menu_options_count = 4;
+const int variable_kernel_filter_menu_options_count = 4;
 
-MenuOption color_menu_options[] = {
+MenuOption color_filter_menu_options[] = {
 	{"Shift", OPTION_SIZE},
 	{"Apply", APPLY},
-	{"Back", MAIN}
+	{"Back", COLOR}
 };
-const int color_menu_options_count = 3;
+const int color_filter_menu_options_count = 3;
 
-MenuOption apply_only_option[] = {
+MenuOption color_apply_only_option[] = {
 	{"Apply", APPLY},
-	{"Back", MAIN}
+	{"Back", COLOR}
 };
-const int apply_only_option_count = 2;
+const int color_apply_only_option_count = 2;
 
 int kernel_size = 7;
 const int kernel_min_size = 3;
@@ -103,47 +115,55 @@ int menu(Image* image) {
 	while(running) {
 		switch(current_menu) {
 			case MAIN:
-				choice = display_menu(MAIN, "ImageWrench", main_menu_options, main_menu_options_count, image);
+				choice = display_menu(current_menu, "ImageWrench", main_menu_options, main_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case KERNEL:
+				choice = display_menu(current_menu, "Kernel Filters", kernel_menu_options, kernel_menu_options_count, image);
+				current_menu = choice.menu;
+				break;
+			case COLOR:
+				choice = display_menu(current_menu, "Color Filters", color_menu_options, color_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case BLUR:
-				choice = display_menu(BLUR, "Blur Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
+				choice = display_menu(current_menu, "Blur Image", variable_kernel_filter_menu_options, variable_kernel_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case SHARPEN:
-				choice = display_menu(SHARPEN, "Sharpen Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
+				choice = display_menu(current_menu, "Sharpen Image", variable_kernel_filter_menu_options, variable_kernel_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case OUTLINE:
-				choice = display_menu(OUTLINE, "Outline Image", kernel_menu_options, kernel_menu_options_count, image);
+				choice = display_menu(current_menu, "Outline Image", kernel_filter_menu_options, kernel_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case EMBOSS:
-				choice = display_menu(EMBOSS, "Emboss Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
+				choice = display_menu(current_menu, "Emboss Image", variable_kernel_filter_menu_options, variable_kernel_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case SOBEL:
-				choice = display_menu(SOBEL, "Sobel Image", variable_kernel_menu_options, variable_kernel_menu_options_count, image);
+				choice = display_menu(current_menu, "Sobel Image", variable_kernel_filter_menu_options, variable_kernel_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case HUE:
-				choice = display_menu(HUE, "Hue Shift Image", color_menu_options, color_menu_options_count, image);
+				choice = display_menu(current_menu, "Hue Shift Image", color_filter_menu_options, color_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case SATURATION:
-				choice = display_menu(SATURATION, "Change Image Saturation", color_menu_options, color_menu_options_count, image);
+				choice = display_menu(current_menu, "Change Image Saturation", color_filter_menu_options, color_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case BRIGHTNESS:
-				choice = display_menu(BRIGHTNESS, "Change Image Brightness", color_menu_options, color_menu_options_count, image);
+				choice = display_menu(current_menu, "Change Image Brightness", color_filter_menu_options, color_filter_menu_options_count, image);
 				current_menu = choice.menu;
 				break;
 			case INVERT:
-				choice = display_menu(INVERT, "Invert Image Colors", apply_only_option, apply_only_option_count, image);
+				choice = display_menu(current_menu, "Invert Image Colors", color_apply_only_option, color_apply_only_option_count, image);
 				current_menu = choice.menu;
 				break;
 			case GRAYSCALE:
-				choice = display_menu(GRAYSCALE, "Grayscale Image", apply_only_option, apply_only_option_count, image);
+				choice = display_menu(current_menu, "Grayscale Image", color_apply_only_option, color_apply_only_option_count, image);
 				current_menu = choice.menu;
 				break;
 			case EXIT:
