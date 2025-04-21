@@ -23,7 +23,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(TARGET): $(OBJ_FILES)
 	@$(call MKDIR,$(BIN_DIR))
-	gcc $(FLAGS) $^ -o $(TARGET)
+	gcc $(FLAGS) $^ -o $(TARGET) -lm
 
 clean:
 	@$(call RMDIR,$(BIN_DIR))
