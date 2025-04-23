@@ -240,7 +240,11 @@ MenuOption display_menu(Menu current_menu, const char* title, MenuOption* option
 				printf("  ");
 			}
 
-			printf("%s ", options[i].title);
+			if(options[i].menu == EXIT && !image_changed) {
+				printf("Exit");
+			} else {
+				printf("%s ", options[i].title);
+			}
 
 			if(options[i].menu == OPTION_SIZE) {
 				if(current_menu == HUE || current_menu == SATURATION || current_menu == BRIGHTNESS) {
