@@ -53,6 +53,12 @@ Image* read_image(char name[]) {
     }
     bytes_read += sizeof(bmp_header);
     image->bmp_header = bmp_header;
+    if(bmp_header.type != 0x4d42) {
+        fprintf(stderr, "Error: Invalid BMP Header type %s\n", name);
+        fclose(file_pointer);
+        free(image);
+        exit(6);
+    }
 
     /*Read DIB Header Size*/
     items_read = fread(&dib_header_size, sizeof(dib_header_size), 1, file_pointer);
